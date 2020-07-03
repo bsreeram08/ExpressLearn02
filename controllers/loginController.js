@@ -10,7 +10,7 @@ exports.getLoginPage = (req, res) => {
   res.sendFile(path.join(__dirname, "../Views", "login.html"));
 };
 exports.performLogin = (req, res) => {
-  console.log(JSON.parse(req.body));
+  console.log(req.body);
   //console.log(req.body.password);
   //res.redirect("/");
   res.send("clicked");
