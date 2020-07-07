@@ -10,38 +10,29 @@ const db = firebase.firestore();
 const usersRef = db.collection('Users');
 exports.addAssignment = async (req, res) => {
     if (req.body.userType === 'users') {
-        let resUser = await usersRef.get();
-        if (resUser.empty) {
-            resUser.send("NO users currently!");
+        let id;
+        let data;
+        data = await usersRef.where('username', '==', req.body.username).get();
+        if (data.empty) {
+            res.send('user not found');
         }
         else {
-            let id;
-            let data;
-            data = await usersRef.where('username', '==', req.body.username).get();
-            if (data.empty) {
-                res.send('user not found');
-            }
-            else {
-                data.forEach(async doc => {
-                    id = doc.id;
-                    const myuserref = usersRef.doc(id);
-                    const obj = JSON.parse(doc.data().assignment);
-                    if (obj != undefined) {
-                        obj.week[parseInt(req.body.assignmentWeek)] = req.body.url;
-                        const res = await myuserref.update({
-                            'assignment': `${JSON.stringify(obj)}`
-                        });
-                    }
-                    else {
-                        obj.week = [];
-                        obj.week[parseInt(req.body.assignmentWeek)] = req.body.url;
-                        const res = await myuserref.update({
-                            'assignment': `${JSON.stringify(obj)}`
-                        });
-                    }
-                    res.send('added');
+            data.forEach(async doc => {
+                id = doc.id;
+                const myuserref = usersRef.doc(id);
+                const obj = JSON.parse(doc.data().assignment);
+                if (obj != undefined) {
+                    obj.week[parseInt(req.body.assignmentWeek)] = req.body.url;
+                }
+                else {
+                    obj.week = [];
+                    obj.week[parseInt(req.body.assignmentWeek)] = req.body.url;
+                }
+                await myuserref.update({
+                    'assignment': `${JSON.stringify(obj)}`
                 });
-            }
+                res.send('added');
+            });
 
         }
     }
