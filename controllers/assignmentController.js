@@ -1,7 +1,6 @@
 const firebase = require("firebase-admin");
 const serviceAccount = require("../secretKey.json");
 const path = require("path");
-const { doesNotReject } = require("assert");
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
     databaseURL: "https://fb-node-learn.firebaseio.com",
