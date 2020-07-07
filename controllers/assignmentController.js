@@ -7,7 +7,7 @@ firebase.initializeApp({
     databaseURL: "https://fb-node-learn.firebaseio.com",
 }, "toDO");
 const db = firebase.firestore();
-const adminsRef = db.collection('Admins');
+//const adminsRef = db.collection('Admins');
 const usersRef = db.collection('Users');
 exports.addAssignment = async (req, res) => {
     if (req.body.userType === 'users') {
