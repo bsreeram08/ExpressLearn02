@@ -11,47 +11,103 @@ const usersRef = db.collection('Users');
 exports.getLoginPage = (req, res) => {
   res.sendFile(path.join(__dirname, "../Views", "login.html"));
 };
-exports.performLogin = async (req, res) => {
-  if (req.body.admin === undefined) {
-    try {
-      const snapShot = await usersRef.where('username', '==', req.body.emailId).get();
-      if (snapShot.empty) {
-        console.log("User Not Found");
-        res.send("not found");
-      }
-      snapShot.forEach(doc => {
-        if (req.body.password === doc.data().password) {
-          // res.sendFile(path.join(__dirname, "../Views", "toDo.html", doc));
-          res.send("Logged in");
-        }
-        else {
-          res.send("Password does not Match.");
-        }
-      });
-    }
-    catch (err) {
-      console.log(err);
-    }
+exports.performAdminsLogin = async (req, res) => {
+  const body = req.body;
+  if (!body) {
+    res.status(403).send({
+      status: "ERROR",
+      message: "Invalid parameters",
+    });
+    return;
   }
-  else {
-    try {
-      const snapShot = await adminsRef.where('username', '==', req.body.emailId).get();
-      if (snapShot.empty) {
-        console.log("Admin Not Found");
-        res.send("not found");
-      }
-      snapShot.forEach(doc => {
-        if (req.body.password === doc.data().password) {
-          //res.sendFile(path.join(__dirname, "../Views", "toDo.html", doc));
-          res.send("Logged in");
-        }
-        else {
-          res.send("Password does not Match.");
-        }
-      });
-    }
-    catch (err) {
-      console.log(err);
-    }
+  const userName = body.username;
+  const password = body.password;
+  if (!userName || !password) {
+    res.status(403).send({
+      status: "ERROR",
+      message: "Invalid parameters",
+    });
+    return;
   }
+  const currentAdminSnapshot = await adminsRef.where(
+    "username",
+    "==",
+    userName.toLowerCase()
+  ).get();
+  if (currentAdminSnapshot.empty) {
+    res.status(404).send({
+      status: "ERROR",
+      message: "Admin not present",
+    });
+    return;
+  }
+  const currentAdminRef = currentAdminSnapshot.docs[0];
+  const adminData = currentAdminRef.data();
+  if (adminData.password !== password) {
+    res.status(404).send({
+      status: "ERROR",
+      message: "Invalid Password",
+    });
+    return;
+  }
+  res.status(200).send({
+    status: "SUCCESS",
+    data: {
+      uid: currentAdminRef.id,
+      username: adminData.username,
+      email: adminData.email,
+      type: adminData.type,
+    },
+  });
+  return;
+}
+exports.performUsersLogin = async (req, res) => {
+  const body = req.body;
+  if (!body) {
+    res.status(403).send({
+      status: "ERROR",
+      message: "Invalid parameters",
+    });
+    return;
+  }
+  const userName = body.username;
+  const password = body.password;
+  if (!userName || !password) {
+    res.status(403).send({
+      status: "ERROR",
+      message: "Invalid parameters",
+    });
+    return;
+  }
+  const currentUserSnapshot = await usersRef.where(
+    "username",
+    "==",
+    userName.toLowerCase()
+  ).get();
+  if (currentUserSnapshot.empty) {
+    res.status(404).send({
+      status: "ERROR",
+      message: "User not present",
+    });
+    return;
+  }
+  const currentUserRef = currentUserSnapshot.docs[0];
+  const userData = currentUserRef.data();
+  if (userData.password !== password) {
+    res.status(404).send({
+      status: "ERROR",
+      message: "Invalid Password",
+    });
+    return;
+  }
+  res.status(200).send({
+    status: "SUCCESS",
+    data: {
+      uid: currentUserRef.id,
+      username: userData.username,
+      email: userData.email,
+      type: userData.type,
+    },
+  });
+  return;
 };
