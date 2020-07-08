@@ -7,44 +7,62 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const usersRef = db.collection('Users');
 exports.addAssignment = async (req, res) => {
-    if (req.body.userType === 'users') {
-        let id;
-        let data;
-        data = await usersRef.where('username', '==', req.body.username).get();
-        if (data.empty) {
-            res.send('user not found');
-        }
-        else {
-            data.forEach(async doc => {
-                id = doc.id;
-                const myuserref = usersRef.doc(id);
-                const obj = JSON.parse(doc.data().assignment);
-                if (obj != undefined) {
-                    obj.week[parseInt(req.body.assignmentWeek)] = req.body.url;
-                }
-                else {
-                    obj.week = [];
-                    obj.week[parseInt(req.body.assignmentWeek)] = req.body.url;
-                }
-                await myuserref.update({
-                    'assignment': `${JSON.stringify(obj)}`
-                });
-                res.send('added');
-            });
-
-        }
+    const body = req.body;
+    const uid = body.uid;
+    const assignmentId = body.assignmentId;
+    const assignmentData = body.assignment;
+    const userType = body.userType;
+    const userRef = await usersRef.doc(uid);
+    const userData = await userRef.get();
+    if (!userData.exists) {
+        res.status(404).send({
+            status: "ERROR",
+            message: "User Not found!"
+        });
+        return;
     }
-    else {
-        const allUsers = await usersRef.get();
-        const responseObj = {};
-        responseObj.users = [];
-        let constructObj;
-        allUsers.forEach(doc => {
-            constructObj = {};
-            constructObj.name = doc.data().username;
-            constructObj.assignment = doc.data().assignment;
-            responseObj.users.push(constructObj);
-            res.send(responseObj);
+    if (userType != "users") {
+        res.status(405).send({
+            status: "ERROR",
+            message: "Operation not permitted for this user."
+        });
+        return;
+    }
+    let addedResponse;
+    const user = userData.data();
+    let assignments = {};
+    if (user.assignments !== undefined) {
+        assignments = JSON.parse(user.assignments);
+    }
+    assignments[assignmentId] = assignmentData;
+    addedResponse = await userRef.update({ "assignments": JSON.stringify(assignments) });
+    console.log(addedResponse);
+    res.status(200).send({
+        status: "SUCESS",
+        message: "Data Added Sucessfully",
+        timestamp: JSON.stringify(addedResponse)
+    });
+    return;
+}
+exports.AllAssignments = async (req, res) => {
+    const allUsers = await usersRef.get();
+    const responseObj = { assignments: [] };
+    let constructObj;
+    if (allUsers.empty) {
+        res.status(404).send({
+            status: "ERROR",
+            message: "No users found"
         });
     }
+    allUsers.forEach(user => {
+        constructObj = {};
+        constructObj.name = user.data().username;
+        constructObj.assignment = JSON.parse(user.data().assignments);
+        responseObj.assignments.push(constructObj);
+    });
+    res.status(200).send({
+        ststus: "SUCESS",
+        message: "All the data is available",
+        data: (responseObj)
+    });
 }
