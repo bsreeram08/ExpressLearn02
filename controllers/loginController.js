@@ -8,9 +8,6 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const adminsRef = db.collection('Admins');
 const usersRef = db.collection('Users');
-exports.getLoginPage = (req, res) => {
-  res.sendFile(path.join(__dirname, "../Views", "login.html"));
-};
 exports.performAdminsLogin = async (req, res) => {
   const body = req.body;
   if (!body) {
