@@ -1,6 +1,5 @@
 const firebase = require("firebase-admin");
 const serviceAccount = require("../secretKey.json");
-const path = require("path");
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
   databaseURL: "https://project-interns.firebaseio.com"

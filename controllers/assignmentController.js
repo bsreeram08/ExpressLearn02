@@ -3,7 +3,7 @@ const serviceAccount = require("../secretKey.json");
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
     databaseURL: "https://fb-node-learn.firebaseio.com",
-}, "toDO");
+}, "assignments");
 const db = firebase.firestore();
 const usersRef = db.collection('Users');
 exports.addAssignment = async (req, res) => {
