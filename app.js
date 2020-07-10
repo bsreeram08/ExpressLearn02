@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const app = express();
 const loginRouter = require("./Routers/loginRouter");
 const assignmentRouter = require("./routers/assignmentRouter");
