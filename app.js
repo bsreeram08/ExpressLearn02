@@ -11,6 +11,12 @@ app.use(bodyParser.json());
 app.use("/login", loginRouter);
 app.use("/assignment", assignmentRouter);
 app.use("/videos", videosRouter);
+app.get("/", (req, res) => {
+  res.status(200).send({
+    status: "SUCESS",
+    message: "ONLINE"
+  });
+});
 app.listen(port, host, (req, res) => {
   console.log("Listening to Port : " + port);
 });
